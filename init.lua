@@ -155,7 +155,7 @@ require('lazy').setup({
             Programpath = Programpath or vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/build/', 'file')
             return Programpath
           end,
-          cwd = '${workspaceFolder}',
+          cwd = '${workspaceFolder}/build/',
           stopAtBeginningOfMainSubprogram = false,
         },
       }
