@@ -588,7 +588,8 @@ require('lazy').setup({
         '<leader>f',
         function()
           require('conform').format {
-            async = true, --lsp_format = 'fallback'
+            async = true,
+            lsp_format = 'fallback',
           }
         end,
         mode = '',
@@ -597,10 +598,9 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      format_on_save = {
-        timeout_ms = 500,
-        -- lsp_format = 'fallback',
-      },
+      format_after_save = function(bufnr)
+        return vim.b[bufnr].disable_autoformat and {} or { lsp_format = 'fallback' }
+      end,
       formatters_by_ft = {
         lua = { 'stylua' },
         c = { 'clang-format' },
