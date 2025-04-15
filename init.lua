@@ -675,9 +675,38 @@ require('lazy').setup({
       },
 
       appearance = {
-        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-        -- Adjusts spacing to ensure icons are aligned
-        nerd_font_variant = 'mono',
+        kind_icons = {
+          Text = 't',
+          Method = 'm',
+          Function = 'F',
+          Constructor = 'n',
+
+          Field = 'f',
+          Variable = 'v',
+          Property = 'p',
+
+          Class = 'C',
+          Interface = 'I',
+          Struct = 'S',
+          Module = 'M',
+
+          Unit = 'u',
+          Value = 'V',
+          Enum = 'e',
+          EnumMember = 'E',
+
+          Keyword = 'k',
+          Constant = 'c',
+
+          Snippet = 's',
+          Color = 'c',
+          File = 'f',
+          Reference = 'r',
+          Folder = 'f',
+          Event = 'e',
+          Operator = 'o',
+          TypeParameter = 'T',
+        },
       },
 
       completion = {
