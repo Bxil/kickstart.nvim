@@ -500,7 +500,7 @@ require('lazy').setup({
 
       local servers = {
         bashls = {},
-        clangd = {},
+        clangd = { cmd = { 'clangd', '--clang-tidy' } },
         ['clang-format'] = {},
         docker_compose_language_service = {},
         dockerls = {},
