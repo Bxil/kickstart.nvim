@@ -498,25 +498,13 @@ require('lazy').setup({
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-      --  Add any additional override configuration in the following tables. Available keys are:
-      --  - cmd (table): Override the default command used to start the server
-      --  - filetypes (table): Override the default list of associated filetypes for the server
-      --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
-      --  - settings (table): Override the default settings passed when initializing the server.
-      --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        bashls = {},
         clangd = {},
         ['clang-format'] = {},
-        pylsp = {
-          settings = {
-            pylsp = {
-              plugins = {
-                pycodestyle = { enabled = false },
-              },
-            },
-          },
-        },
-        rust_analyzer = {},
+        docker_compose_language_service = {},
+        dockerls = {},
+        jsonls = {},
         lua_ls = {
           settings = {
             Lua = {
@@ -528,6 +516,17 @@ require('lazy').setup({
             },
           },
         },
+        pylsp = {
+          settings = {
+            pylsp = {
+              plugins = {
+                pycodestyle = { enabled = false },
+              },
+            },
+          },
+        },
+        rust_analyzer = {},
+        wgsl_analyzer = {},
       }
 
       local ensure_installed = vim.tbl_keys(servers)
