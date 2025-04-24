@@ -503,9 +503,6 @@ require('lazy').setup({
         bashls = {},
         clangd = { cmd = { 'clangd', '--clang-tidy' } },
         ['clang-format'] = {},
-        docker_compose_language_service = {},
-        dockerls = {},
-        jsonls = {},
         lua_ls = {
           settings = {
             Lua = {
