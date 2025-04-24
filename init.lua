@@ -62,6 +62,7 @@ vim.opt.confirm = true
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.open_float, { desc = 'diagnostic' })
+vim.keymap.set('n', '<leader>Q', vim.diagnostic.setqflist, { desc = 'diagnostic' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
