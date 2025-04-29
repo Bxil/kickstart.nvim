@@ -553,7 +553,10 @@ require('lazy').setup({
       }
     end,
   },
-
+  {
+    'stevearc/overseer.nvim',
+    opts = {},
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
