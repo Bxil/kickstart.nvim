@@ -500,9 +500,9 @@ require('lazy').setup({
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
       local servers = {
-        bashls = {},
         clangd = { cmd = { 'clangd', '--clang-tidy' } },
         ['clang-format'] = {},
+        codelldb = {},
         lua_ls = {
           settings = {
             Lua = {
@@ -526,6 +526,10 @@ require('lazy').setup({
         rust_analyzer = {},
         wgsl_analyzer = {},
       }
+
+      if vim.fn.has 'linux' == 1 then
+        servers['bashls'] = {}
+      end
 
       local ensure_installed = vim.tbl_keys(servers)
       vim.list_extend(ensure_installed, {
