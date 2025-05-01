@@ -145,6 +145,11 @@ require('lazy').setup({
         command = 'gdb',
         args = { '--interpreter=dap', '--eval-command', 'set print pretty on' },
       }
+      dap.adapters.codelldb = {
+        type = 'executable',
+        command = vim.fn.stdpath 'data' .. '/mason/packages/codelldb/extension/adapter/codelldb',
+        detached = false,
+      }
 
       dap.configurations.cpp = {
         {
@@ -159,7 +164,21 @@ require('lazy').setup({
             return Programpath
           end,
           cwd = '${workspaceFolder}',
-          stopAtBeginningOfMainSubprogram = false,
+        },
+      }
+      dap.configurations.rust = {
+        {
+          type = 'codelldb',
+          name = 'Launch',
+          request = 'launch',
+          program = function()
+            return vim.fs.normalize(vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/debug/', 'file'))
+          end,
+          cwd = '${workspaceFolder}',
+          terminal = 'integrated',
+          env = {
+            PATH = '${env:USERPROFILE}/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin;${workspaceFolder}/target/debug/deps;${env:PATH}',
+          },
         },
       }
 
