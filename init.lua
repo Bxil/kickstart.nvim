@@ -108,17 +108,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
-vim.api.nvim_create_user_command('FormatDisable', function()
-  vim.b.disable_autoformat = true
-end, {
-  desc = 'Disable autoformat-on-save',
-})
-vim.api.nvim_create_user_command('FormatEnable', function()
-  vim.b.disable_autoformat = false
-end, {
-  desc = 'Re-enable autoformat-on-save',
-})
-
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -543,6 +532,7 @@ require('lazy').setup({
         },
         rust_analyzer = {},
         wgsl_analyzer = {},
+        prettier = {},
       }
 
       if vim.fn.has 'linux' == 1 then
@@ -594,14 +584,14 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      format_after_save = function(bufnr)
-        return vim.b[bufnr].disable_autoformat and {} or { lsp_format = 'fallback' }
-      end,
+      format_after_save = { lsp_format = 'fallback' },
       formatters_by_ft = {
         lua = { 'stylua' },
         c = { 'clang-format' },
         cpp = { 'clang-format' },
         python = { 'black' },
+        javascript = { 'prettier' },
+        html = { 'prettier' },
       },
     },
   },
