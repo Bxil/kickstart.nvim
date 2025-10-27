@@ -62,6 +62,11 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 vim.opt.confirm = true
 
+if vim.fn.has 'win32' then
+  vim.opt.shellcmdflag = '-c'
+  vim.opt.shellquote = '"'
+end
+
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>q', vim.diagnostic.open_float, { desc = 'diagnostic' })
 vim.keymap.set('n', '<leader>Q', vim.diagnostic.setqflist, { desc = 'diagnostic' })
