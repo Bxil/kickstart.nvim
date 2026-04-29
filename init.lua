@@ -122,7 +122,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     error('Error cloning lazy.nvim:\n' .. out)
   end
-end ---@diagnostic disable-next-line: undefined-field
+end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
@@ -421,26 +421,13 @@ require('lazy').setup({
           map('gO', vim.lsp.buf.document_symbol, 'symbols document')
           map('gW', vim.lsp.buf.workspace_symbol, 'symbols workspace')
 
-          -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
-          ---@param client vim.lsp.Client
-          ---@param method vim.lsp.protocol.Method
-          ---@param bufnr? integer some lsp support methods only in specific files
-          ---@return boolean
-          local function client_supports_method(client, method, bufnr)
-            if vim.fn.has 'nvim-0.11' == 1 then
-              return client:supports_method(method, bufnr)
-            else
-              return client.supports_method(method, { bufnr = bufnr })
-            end
-          end
-
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
           --    See `:help CursorHold` for information about when this is executed
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+          if client and client:supports_method('textDocument/documentHighlight', event.buf) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -463,8 +450,11 @@ require('lazy').setup({
             })
           end
 
-          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-            vim.lsp.inlay_hint.enable()
+          -- The following code creates a keymap to toggle inlay hints in your
+          -- code, if the language server you are using supports them
+          --
+          -- This may be unwanted, since they displace some of your code
+          if client and client:supports_method('textDocument/inlayHint', event.buf) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -534,6 +524,7 @@ require('lazy').setup({
         rust_analyzer = {},
         wgsl_analyzer = {},
         prettier = {},
+        ['tree-sitter-cli'] = {},
       }
 
       if vim.fn.has 'linux' == 1 then
@@ -628,7 +619,6 @@ require('lazy').setup({
         },
         opts = {},
       },
-      'folke/lazydev.nvim',
     },
     --- @module 'blink.cmp'
     --- @type blink.cmp.Config
@@ -785,11 +775,40 @@ require('lazy').setup({
   },
   {
     'nvim-treesitter/nvim-treesitter',
+    lazy = false,
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs',
+    branch = 'main',
     config = function()
+      -- ensure basic parser are installed
       local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
       require('nvim-treesitter').install(parsers)
+
+      ---@param buf integer
+      ---@param language string
+      local function treesitter_try_attach(buf, language)
+        -- check if parser exists and load it
+        if not vim.treesitter.language.add(language) then
+          return
+        end
+        -- enables syntax highlighting and other treesitter features
+        vim.treesitter.start(buf, language)
+
+        -- enables treesitter based folds
+        -- for more info on folds see `:help folds`
+        -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        -- vim.wo.foldmethod = 'expr'
+
+        -- check if treesitter indentation is available for this language, and if so enable it
+        -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
+        local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
+
+        -- enables treesitter based indentation
+        if has_indent_query then
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end
+
+      local available_parsers = require('nvim-treesitter').get_available()
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match
@@ -799,26 +818,24 @@ require('lazy').setup({
             return
           end
 
-          -- check if parser exists and load it
-          if not vim.treesitter.language.add(language) then
-            return
+          local installed_parsers = require('nvim-treesitter').get_installed 'parsers'
+
+          if vim.tbl_contains(installed_parsers, language) then
+            -- enable the parser if it is installed
+            treesitter_try_attach(buf, language)
+          elseif vim.tbl_contains(available_parsers, language) then
+            -- if a parser is available in `nvim-treesitter` auto install it, and enable it after the installation is done
+            require('nvim-treesitter').install(language):await(function()
+              treesitter_try_attach(buf, language)
+            end)
+          else
+            -- try to enable treesitter features in case the parser exists but is not available from `nvim-treesitter`
+            treesitter_try_attach(buf, language)
           end
-          -- enables syntax highlighting and other treesitter features
-          vim.treesitter.start(buf, language)
-
-          -- enables treesitter based folds
-          -- for more info on folds see `:help folds`
-          -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-          -- vim.wo.foldmethod = 'expr'
-
-          -- enables treesitter based indentation
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         end,
       })
     end,
   },
-  'nvim-treesitter/nvim-treesitter-context',
-
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
