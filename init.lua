@@ -459,6 +459,19 @@ require('lazy').setup({
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
           end
+
+          if client and client.name == 'rust_analyzer' then
+            map('<leader>tt', function()
+              vim.ui.select({ 'Default', 'WebAssembly' }, {}, function(_, idx)
+                if idx == nil then
+                  return
+                end
+                local values = { nil, 'wasm32-unknown-unknown' }
+                client.settings['rust-analyzer']['cargo'].target = values[idx]
+                vim.cmd 'lsp restart'
+              end)
+            end, '[T]oggle [T]arget')
+          end
         end,
       })
 
@@ -521,7 +534,15 @@ require('lazy').setup({
             },
           },
         },
-        rust_analyzer = {},
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              cargo = {
+                target = nil,
+              },
+            },
+          },
+        },
         wgsl_analyzer = {},
         prettier = {},
         ['tree-sitter-cli'] = {},
